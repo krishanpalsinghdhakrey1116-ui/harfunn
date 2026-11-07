@@ -23,17 +23,16 @@
         }
         button:hover { background: rgba(102, 252, 241, 0.1); }
         .player-box { margin-top: 30px; display: none; width: 100%; }
-        video, iframe { width: 100%; height: 400px; border: 1px solid #45a29e; background: #000; }
+        iframe { width: 100%; height: 400px; border: 1px solid #45a29e; background: #000; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>$ execute_video_proxy_</h1>
-        <input type="text" id="urlInput" placeholder="Paste YouTube link here (e.g., https://www.youtube.com/watch?v=...)">
+        <input type="text" id="urlInput" placeholder="Paste YouTube link or Video ID here">
         <button onclick="loadVideo()">$ initialize_stream</button>
         
         <div class="player-box" id="playerBox">
-            <!-- Uses a public, unblocked proxy pipeline infrastructure -->
             <iframe id="videoFrame" src="" allowfullscreen></iframe>
         </div>
     </div>
@@ -44,21 +43,23 @@
             const playerBox = document.getElementById('playerBox');
             const frame = document.getElementById('videoFrame');
             
-            if(!input) return alert("Please input a valid URL.");
+            if(!input) return alert("Please input a valid URL or Video ID.");
             
-            // Extract the standard 11-character video ID from the YouTube URL
+            // Extract the 11-character video ID accurately using a regex pattern
             let videoId = "";
             const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             const match = input.match(regExp);
             
             if (match && match[2].length === 11) {
                 videoId = match[2];
+            } else if (input.length === 11) {
+                videoId = input;
             } else {
-                videoId = input; // If they just paste the raw ID directly
+                return alert("Could not parse a valid 11-digit YouTube Video ID. Please check your link.");
             }
             
-            // Route the frame stream through an embedded public processing node
-            frame.src = `https://youtube.com{videoId}`;
+            // Route through an alternative public Invidious instance player embed path
+            frame.src = `https://nerdvpn.de{videoId}`;
             playerBox.style.display = "block";
         }
     </script>
