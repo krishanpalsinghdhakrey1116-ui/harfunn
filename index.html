@@ -3,113 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Force Download Portal</title>
+    <title>Stream Core // Private Hub</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f172a;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            margin: 0; background-color: #0b0c10; color: #c5c6c7;
+            font-family: 'Courier New', monospace; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
         }
-
-        .download-container {
-            text-align: center;
+        .container { width: 100%; max-width: 700px; text-align: center; }
+        h1 { color: #66fcf1; font-size: 1.5rem; margin-bottom: 20px; }
+        input {
+            width: 100%; padding: 12px; background: #1f2833; border: 1px solid #45a29e;
+            color: #fff; border-radius: 4px; box-sizing: border-box; font-family: inherit;
         }
-
-        .btn-download {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            background-color: #10b981;
-            color: #ffffff;
-            font-size: 1.25rem;
-            font-weight: 600;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 8px;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
+        button {
+            margin-top: 15px; padding: 12px 24px; background: transparent;
+            color: #66fcf1; border: 1px solid #66fcf1; border-radius: 4px;
+            cursor: pointer; font-family: inherit; font-weight: bold;
         }
-
-        .btn-download:hover {
-            background-color: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.6);
-        }
-
-        .btn-download:disabled {
-            background-color: #64748b;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .icon-arrow {
-            width: 20px;
-            height: 20px;
-            border-left: 3px solid white;
-            border-bottom: 3px solid white;
-            transform: rotate(-45deg);
-            margin-top: -4px;
-        }
+        button:hover { background: rgba(102, 252, 241, 0.1); }
+        .player-box { margin-top: 30px; display: none; width: 100%; }
+        video, iframe { width: 100%; height: 400px; border: 1px solid #45a29e; background: #000; }
     </style>
 </head>
 <body>
-
-    <div class="download-container">
-        <!-- TRIGGER FORCE DOWNLOAD ON CLICK -->
-        <button id="dlBtn" class="btn-download" onclick="triggerDirectDownload()">
-            <div class="icon-arrow"></div>
-            <span id="btnText">Force Download Video</span>
-        </button>
+    <div class="container">
+        <h1>$ execute_video_proxy_</h1>
+        <input type="text" id="urlInput" placeholder="Paste YouTube link here (e.g., https://www.youtube.com/watch?v=...)">
+        <button onclick="loadVideo()">$ initialize_stream</button>
+        
+        <div class="player-box" id="playerBox">
+            <!-- Uses a public, unblocked proxy pipeline infrastructure -->
+            <iframe id="videoFrame" src="" allowfullscreen></iframe>
+        </div>
     </div>
 
     <script>
-        const targetVideoUrl = "https://rr1---sn-8vq54voxpo-qxaez.googlevideo.com/videoplayback?expire=1794050609&ei=0bXuatG9IMf91PIPvaOwkQo&ip=109.41.112.155&id=o-AMwjZ0Biwc4KmtByII8V_KSwdyxiOXeqFOr95WHEoIqo&itag=136&aitags=133%2C134%2C135%2C136%2C160%2C242%2C243%2C244%2C247%2C278%2C394%2C395%2C396%2C397%2C398&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&rms=au%2Cau&pcm2=no&bui=AZFAFb8D62jBXWWf74RMdbNfoeVk4kzIxYyceXV5c817Jxtq8EKHfqJYMGJ_BnSyhNLkFN7hIhsS-5wy&spc=mpRQ_2S_kLZYkdv3MZztYThjgNqB-T5hSLuAFruynvIVRSnqtQt4&vprv=1&svpuc=1&mime=video%2Fmp4&ns=qPWnSLWibwn_iLFi6F7fcfwZ&rqh=1&gir=yes&clen=6604789&dur=204.833&lmt=1792383658980485&epbp=1&keepalive=yes&fexp=51565115&c=TVHTML5_SIMPLY&sefc=1&txp=5532234&n=swGWmnsOF085Ug&sparams=expire%2Cei%2Cip%2Cid%2Caitags%2Csource%2Crequiressl%2Cxpc%2Cpcm2%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AE0s2JYwRAIgRw9YzFU9kRiGlKWX6z5b83sODKbaIwqUlD_0Y-go300CICrVuuxgLHb68lbseSCTrFl2mjb3zldmEDR2iw812Jhh&pot=Mo4ESYb-3zCreTJJxOqFJUWr3CC6zZXgAEgtNKyHbRrKWCh8xKGrGv0S-dDe_Buy63VidX_Uj24o3IrYIbjfhXmF2Tuj2KPNLKRKCMKth2ga2mTtPmrLefx1Je_pPto6cNoIBXFDXqscN4dIOatDZJ5I6_Xx2CLjXfTNNt_1c9jtHSf18uCwDNiSBFdG8Cy-4PNiPgfP4434UNqohZA7mLg0tu0V55RffK0vOdpBOx7aPsElwLK0mdcbzFMillds_ZzBYh-p1se1ea8RRRzsphx3Vwi5LBOkmvBmQfF__kfW81PfKwrVTwECW4d3QKnaInx4QlCO5Rro4pamhSlrbYvzBk3VRKHKv5_X1aAD4pT9e0erqZp-X2tDLCQoD9rLAcsuRYITL_-Xd7e9uCYExH3R5eOY1VfnalXYIEaTHX60IySPCjDe5CbZ4Nte5cWYsZYuu4QUcQNqV97QCw1dnLTxurWOKxaBbyhCjr44ddYOKy5erf10-MQbJPM6dnCRQ5uudzwY1SktoPkKlD6zSMOJlcZf3N3QAHgbvAOiNB0txOaywTEOCwTv4M7g1Y99R7Txja3Q1lDCGIectsBvHqZMANMlbG6iW877N0pv68VJsrA-6iOyX_mljjxeRog1uiYK5rwbsRYZIhUC6C4LBzkmTLBI3T85HA4O5-m5A9SV1kSv-E1TySyvs04_Bv7BUg==&cms_redirect=yes&cps=870&met=1794031428,&mh=lo&mip=2402:3a80:438a:ea16:0:47:b56d:a201&mm=18&mn=sn-8vq54voxpo-qxaez&ms=aub&mt=1794030829&mv=m&mvi=1&pl=48&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRAIgNL4hq-Nk3-Mcx-sxdinD-wqtQL65DRM4Ad0frhx4Bk8CIC1q-6l-dsBTGYurl23kBkN0XZuWMFkWcJc9zZL1XUD-";
-
-        function triggerDirectDownload() {
-            const button = document.getElementById('dlBtn');
-            const text = document.getElementById('btnText');
+        function loadVideo() {
+            const input = document.getElementById('urlInput').value.trim();
+            const playerBox = document.getElementById('playerBox');
+            const frame = document.getElementById('videoFrame');
             
-            button.disabled = true;
-            text.innerText = "Downloading Stream...";
-
-            // Fetch data via code behind the scenes
-            fetch(targetVideoUrl)
-                .then(response => {
-                    if (!response.ok) throw new Error("Network response error or token expired.");
-                    return response.blob();
-                })
-                .then(blob => {
-                    // Turn raw file stream into local object URL
-                    const localUrl = window.URL.createObjectURL(blob);
-                    const hiddenAnchor = document.createElement('a');
-                    
-                    hiddenAnchor.style.display = 'none';
-                    hiddenAnchor.href = localUrl;
-                    hiddenAnchor.download = 'video-file.mp4'; // Dictates final file type natively
-                    
-                    document.body.appendChild(hiddenAnchor);
-                    hiddenAnchor.click(); // Trigger local OS file save
-                    
-                    // Cleanup memory
-                    window.URL.revokeObjectURL(localUrl);
-                    document.body.removeChild(hiddenAnchor);
-                    
-                    button.disabled = false;
-                    text.innerText = "Force Download Video";
-                })
-                .catch(error => {
-                    alert("Download Failed: The GoogleVideo streaming token has expired or is blocking direct scripting access.");
-                    button.disabled = false;
-                    text.innerText = "Force Download Video";
-                    console.error(error);
-                });
+            if(!input) return alert("Please input a valid URL.");
+            
+            // Extract the standard 11-character video ID from the YouTube URL
+            let videoId = "";
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = input.match(regExp);
+            
+            if (match && match[2].length === 11) {
+                videoId = match[2];
+            } else {
+                videoId = input; // If they just paste the raw ID directly
+            }
+            
+            // Route the frame stream through an embedded public processing node
+            frame.src = `https://youtube.com{videoId}`;
+            playerBox.style.display = "block";
         }
     </script>
 </body>
